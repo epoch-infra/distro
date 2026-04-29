@@ -8,7 +8,7 @@
 # Requires: the `opencrow` flake input available as a module argument
 # (typically via specialArgs in the consuming flake).
 {
-  opencrow,
+  inputs,
   config,
   lib,
   pkgs,
@@ -19,7 +19,7 @@ let
   cfg = config.services.opencrow-nostr;
 in
 {
-  imports = [ opencrow.nixosModules.default ];
+  imports = [ inputs.opencrow.nixosModules.default ];
 
   options.services.opencrow-nostr = {
     enable = lib.mkEnableOption "opencrow with nostr backend and local Ollama LLM";

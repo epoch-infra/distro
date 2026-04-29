@@ -4,3 +4,7 @@
 # nix
 result
 result-*
+
+
+# qemu disk images
+*.qcow2

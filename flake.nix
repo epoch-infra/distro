@@ -12,6 +12,8 @@
     opencrow.inputs.treefmt-nix.follows = "treefmt-nix";
     noctalia-plugins.url = "github:Mic92/noctalia-plugins";
     noctalia-plugins.inputs.nixpkgs.follows = "nixpkgs";
+    noctalia-shell.url = "github:noctalia-dev/noctalia-shell";
+    noctalia-shell.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
