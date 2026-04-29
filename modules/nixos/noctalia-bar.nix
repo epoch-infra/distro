@@ -1,13 +1,12 @@
 # Noctalia bar with AI chat integration.
 #
-# Single import that provides the noctalia desktop shell bar and the
-# opencrow-chat plugin.  Use this to add the AI chat bar to any
-# Wayland compositor (GNOME, Sway, Hyprland, …).
+# Builds on noctalia-plugin (opencrow + llama-swap) and adds the
+# noctalia desktop shell bar.  Use this to add the AI chat bar to any
+# Wayland compositor (GNOME, Sway, Hyprland, \u2026).
 { inputs, ... }:
 {
   imports = [
-    inputs.opencrow.nixosModules.default
+    (import ./noctalia-plugin.nix { inherit inputs; })
     (import ./noctalia.nix { inherit inputs; })
-    (import ./opencrow.nix { inherit inputs; })
   ];
 }

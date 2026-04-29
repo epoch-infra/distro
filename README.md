@@ -71,9 +71,6 @@ noctalia shell bar with chat widget, opencrow AI agent, and local LLM server.
     enable = true;
     noctaliaPlugin = true;
   };
-
-  # Local LLM server
-  services.llama-swap.enable = true;
 }
 ```
 
@@ -97,8 +94,6 @@ You keep your compositor.
     enable = true;
     noctaliaPlugin = true;
   };
-
-  services.llama-swap.enable = true;
 }
 ```
 
@@ -129,8 +124,6 @@ chat widget and agent backend.
     enable = true;
     noctaliaPlugin = true;
   };
-
-  services.llama-swap.enable = true;
 }
 ```
 
