@@ -127,6 +127,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Enable llama-swap by default — opencrow-local's default llmUrl
+    # points at llama-swap's port (8012).
+    services.llama-swap.enable = lib.mkDefault true;
     # models.json for pi provider discovery + noctalia socket symlink.
     systemd.tmpfiles.rules =
       let

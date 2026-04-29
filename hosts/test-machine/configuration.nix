@@ -35,8 +35,5 @@
     socketName = "Test Bot";
     noctaliaPlugin = true;
   };
-
-  services.llama-swap.enable = true;
-
   system.stateVersion = "25.05";
 }
