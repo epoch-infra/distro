@@ -4,10 +4,10 @@
 # a UNIX socket (NDJSON protocol) for chat UIs to connect to.
 # Works with the noctalia nostr-chat plugin, or any NDJSON client.
 #
-# Requires: the `noctalia-plugins` flake input available as a module
-# argument (typically via specialArgs in the consuming flake).
+# Requires: `inputs` available as a module argument (typically via
+# specialArgs in the consuming flake).
 {
-  noctalia-plugins,
+  inputs,
   config,
   lib,
   pkgs,
@@ -17,7 +17,7 @@
 let
   cfg = config.services.nostr-chatd;
   # Flake source contains the QML plugin at /nostr-chat
-  pluginDir = "${noctalia-plugins}/nostr-chat";
+  pluginDir = "${inputs.noctalia-plugins}/nostr-chat";
 in
 {
   options.services.nostr-chatd = {
@@ -77,7 +77,7 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = noctalia-plugins.packages.${pkgs.system}.nostr-chatd;
+      default = inputs.noctalia-plugins.packages.${pkgs.system}.nostr-chatd;
       description = "The nostr-chatd package to use.";
     };
   };
@@ -89,6 +89,11 @@ in
         home = config.users.users.${user}.home;
         dest = "${home}/.config/noctalia/plugins/nostr-chat";
       in [
+        # Ensure the full path is owned by the user. Without this,
+        # tmpfiles refuses to traverse ownership boundaries (e.g.
+        # /home/test owned by test → .config created by greeter as root).
+        "d ${home}/.config 0755 ${user} users -"
+        "d ${home}/.config/noctalia 0755 ${user} users -"
         "d ${home}/.config/noctalia/plugins 0755 ${user} users -"
         "L+ ${dest} - - - - ${pluginDir}"
       ]) cfg.noctaliaPluginUsers

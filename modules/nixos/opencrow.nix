@@ -4,11 +4,10 @@
 # - Nostr backend as default
 # - Ollama provider with models.json auto-generation
 # - Sensible defaults for relays, timeouts, and logging
+# Requires `inputs` in module args (specialArgs or _module.args).
 #
-# Requires: the `opencrow` flake input available as a module argument
-# (typically via specialArgs in the consuming flake).
+# The upstream opencrow NixOS module is imported by distro.nix.
 {
-  inputs,
   config,
   lib,
   pkgs,
@@ -19,7 +18,6 @@ let
   cfg = config.services.opencrow-nostr;
 in
 {
-  imports = [ inputs.opencrow.nixosModules.default ];
 
   options.services.opencrow-nostr = {
     enable = lib.mkEnableOption "opencrow with nostr backend and local Ollama LLM";

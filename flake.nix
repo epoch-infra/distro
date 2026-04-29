@@ -14,6 +14,9 @@
     noctalia-plugins.inputs.nixpkgs.follows = "nixpkgs";
     noctalia-shell.url = "github:noctalia-dev/noctalia-shell";
     noctalia-shell.inputs.nixpkgs.follows = "nixpkgs";
+    llm-agents.url = "github:numtide/llm-agents.nix";
+    llm-agents.inputs.nixpkgs.follows = "nixpkgs";
+    llm-agents.inputs.treefmt-nix.follows = "treefmt-nix";
   };
 
   outputs =
