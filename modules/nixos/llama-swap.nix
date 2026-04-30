@@ -46,28 +46,40 @@ in
       description = "llama-cpp package providing llama-server.";
     };
 
+    modelExtraArgs = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      example = {
+        "qwen2.5:0.5b" = "--temp 0 --seed 42";
+      };
+      description = "Per-model extra llama-server flags appended to its cmd.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
 
     hardware.graphics.enable = lib.mkDefault true;
 
-    services.llama-swap = {
-      listenAddress = "0.0.0.0";
-      port = lib.mkDefault 8012;
-      settings = {
-        healthCheckTimeout = 3600;
-        logToStdout = "both";
-        models = {
-          "qwen2.5:0.5b" = {
-            cmd = "${llama-server} -m ${qwen25-05b-gguf} --port \${PORT}";
-          };
-          "gemma4:e2b" = {
-            cmd = "${llama-server} -m ${gemma4-e2b-gguf} --port \${PORT}";
+    services.llama-swap =
+      let
+        modelArgs = id: lib.optionalString (cfg.modelExtraArgs ? ${id}) " ${cfg.modelExtraArgs.${id}}";
+      in
+      {
+        listenAddress = "0.0.0.0";
+        port = lib.mkDefault 8012;
+        settings = {
+          healthCheckTimeout = 3600;
+          logToStdout = "both";
+          models = {
+            "qwen2.5:0.5b" = {
+              cmd = "${llama-server} -m ${qwen25-05b-gguf} --port \${PORT}" + modelArgs "qwen2.5:0.5b";
+            };
+            "gemma4:e2b" = {
+              cmd = "${llama-server} -m ${gemma4-e2b-gguf} --port \${PORT}" + modelArgs "gemma4:e2b";
+            };
           };
         };
       };
-    };
 
     # llama-server binary on PATH for debugging
     environment.systemPackages = [ cfg.llama-server-package ];
