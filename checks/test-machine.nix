@@ -29,7 +29,10 @@ pkgs.testers.runNixOSTest {
   nodes.test-machine =
     { lib, pkgs, ... }:
     {
-      imports = import ../hosts/test-machine/modules.nix;
+      imports = [
+        inputs.self.nixosModules.distro
+        ../hosts/test-machine/configuration.nix
+      ];
 
       # The host pins a real disk; the test framework provides its own.
       fileSystems = lib.mkForce { };

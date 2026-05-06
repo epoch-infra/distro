@@ -3,7 +3,7 @@
 # Installs noctalia-shell (patched with plugins-autoload support) and
 # symlinks the opencrow-chat plugin into the autoload directory so it
 # is enabled automatically when noctalia starts.
-{ inputs }:
+{ inputs, ... }:
 {
   config,
   lib,

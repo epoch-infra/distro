@@ -5,7 +5,7 @@
 # - Ollama provider with models.json auto-generation
 # - Noctalia plugin installation (optional)
 # The upstream opencrow NixOS module is imported by distro.nix.
-{ inputs }:
+{ inputs, ... }:
 {
   config,
   lib,

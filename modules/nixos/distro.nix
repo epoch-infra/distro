@@ -6,13 +6,14 @@
 #
 # Configures greetd to auto-login into niri by default.  Override
 # `services.greetd` in your host config to customise.
-{ inputs, config, lib, ... }:
+{ inputs, ... }:
+{ config, lib, ... }:
 {
   imports = [
-    (import ./noctalia-bar.nix { inherit inputs; })
-    (import ./voxtype.nix { inherit inputs; })
-    ./niri.nix
-    ./vm-debug.nix
+    inputs.self.nixosModules.noctalia-bar
+    inputs.self.nixosModules.voxtype
+    inputs.self.nixosModules.niri
+    inputs.self.nixosModules.vm-debug
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];

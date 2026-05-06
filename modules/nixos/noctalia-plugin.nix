@@ -8,14 +8,15 @@
 # default; override with `services.opencrow-local.enable = false;` (or
 # `noctaliaPlugin = false`) if you only want to pull in the option set.
 { inputs, ... }:
+{ ... }:
 let
   inherit (inputs.nixpkgs) lib;
 in
 {
   imports = [
     inputs.opencrow.nixosModules.default
-    (import ./opencrow.nix { inherit inputs; })
-    ./llama-swap.nix
+    inputs.self.nixosModules.opencrow
+    inputs.self.nixosModules.llama-swap
   ];
 
   services.opencrow-local = {

@@ -5,7 +5,7 @@
 # service that starts with the graphical session.
 #
 # Keybinding: Mod+Space  (defined in niri.nix)
-{ inputs }:
+{ inputs, ... }:
 {
   config,
   lib,

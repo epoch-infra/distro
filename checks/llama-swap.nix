@@ -5,7 +5,7 @@
 #
 # Extends the module's default models with SmolLM-135M for fast testing.
 # Tests both qwen2.5:0.5b (default) and smollm completions.
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 let
   inherit (pkgs) lib;
@@ -26,7 +26,7 @@ pkgs.testers.nixosTest {
       llama-server = lib.getExe' config.services.llama-swap.llama-server-package "llama-server";
     in
     {
-      imports = [ ../modules/nixos/llama-swap.nix ];
+      imports = [ inputs.self.nixosModules.llama-swap ];
 
       services.llama-swap = {
         enable = true;

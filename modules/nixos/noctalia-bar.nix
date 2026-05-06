@@ -4,9 +4,10 @@
 # noctalia desktop shell bar.  Use this to add the AI chat bar to any
 # Wayland compositor (GNOME, Sway, Hyprland, \u2026).
 { inputs, ... }:
+{ ... }:
 {
   imports = [
-    (import ./noctalia-plugin.nix { inherit inputs; })
-    (import ./noctalia.nix { inherit inputs; })
+    inputs.self.nixosModules.noctalia-plugin
+    inputs.self.nixosModules.noctalia
   ];
 }
