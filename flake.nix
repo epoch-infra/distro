@@ -26,6 +26,7 @@
 
       base = inputs.blueprint {
         inherit inputs;
+        systems = [ "x86_64-linux" ];
         nixpkgs.config.allowUnfree = true;
       };
 
@@ -40,10 +41,7 @@
         "installer-target-session"
       ];
 
-      debugSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-      ];
+      debugSystems = [ "x86_64-linux" ];
 
       mkDebug =
         system:
