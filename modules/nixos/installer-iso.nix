@@ -70,7 +70,7 @@ in
   # build time by ~5x at the cost of a moderately larger image —
   # acceptable since this is a per-machine install medium, not a
   # download artifact.
-  isoImage.squashfsCompression = "zstd -Xcompression-level 5";
+  isoImage.squashfsCompression = "zstd -Xcompression-level 3";
 
   # Pre-stage everything `nix-build` + `nixos-install` will touch:
   #
