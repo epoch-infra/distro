@@ -86,5 +86,11 @@
     base
     // {
       debug = lib.genAttrs debugSystems mkDebug;
+      # Bootable ISO image, exposed outside `packages` so it doesn't
+      # get pulled into `nix flake check`. Build with
+      #   nix build .#iso.x86_64-linux.installer
+      iso = lib.genAttrs debugSystems (_system: {
+        installer = base.nixosConfigurations.installer.config.system.build.isoImage;
+      });
     };
 }
