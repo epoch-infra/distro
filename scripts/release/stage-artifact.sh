@@ -17,8 +17,7 @@ if [ -z "$iso" ]; then
   exit 1
 fi
 
-base=$(basename "$iso" .iso)
-out="dist/${base}-${tag}.iso"
+out="dist/${tag}-x86_64-linux.iso"
 cp --reflink=auto "$iso" "$out"
 (cd dist && sha256sum "$(basename "$out")" >"$(basename "$out").sha256")
 
