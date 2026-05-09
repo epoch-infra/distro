@@ -2,10 +2,19 @@
 name: Calendar
 description: View, add, edit and delete events on CalDAV calendars (Nextcloud, Radicale, Fastmail, iCloud, etc.) via the caldav wrapper.
 config:
-  url: Full CalDAV collection URL — the address of one specific calendar, not the server root. Example for Nextcloud — https://cloud.example.com/remote.php/dav/calendars/USER/CALENDAR/. iCloud users — supply the per-calendar URL shown by your client.
+  url: |
+    **Full CalDAV collection URL** — the address of one specific
+    calendar, *not* the server root.
+
+    - **Nextcloud** — `https://cloud.example.com/remote.php/dav/calendars/USER/CALENDAR/`
+    - **iCloud** — supply the per-calendar URL shown by your client.
   user: CalDAV username
 secrets:
-  password: CalDAV password (use an app-specific password for iCloud / two-factor accounts)
+  password: |
+    CalDAV password.
+
+    Use an **app-specific password** for iCloud or any account with
+    two-factor authentication enabled.
 ---
 
 Manage CalDAV calendar events using the `caldav` wrapper, which handles

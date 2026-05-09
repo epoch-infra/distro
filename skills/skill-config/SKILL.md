@@ -24,9 +24,12 @@ chat clean and the flow consistent.
 ## Steps
 
 1. **Find the target.** Run `skill-config list` to see installed skills
-   and which already have profiles configured. If the user named a
-   skill, jump to step 2. Otherwise, list the candidates and ask which
-   one.
+   and which already have profiles configured. **Use the skill name
+   exactly as it appears in this list** — they are lowercase short
+   identifiers like `calendar`, not display names like `Calendar` or
+   `AI Chat`. (Lookups are case-insensitive as a fallback, but matching
+   verbatim avoids any guesswork.) If the user named a skill, jump to
+   step 2. Otherwise, list the candidates and ask which one.
 
 2. **Read its schema.** Run `skill-config schema <skill>`. The output
    is YAML with two optional top-level keys, `config:` and `secrets:`.
@@ -52,7 +55,11 @@ chat clean and the flow consistent.
    know to look at it.
 
 5. **Handle each exit code:**
-   - `0` — submitted. Move to the next field.
+   - `0` — submitted (stdout: `saved <skill>.<profile>.<field>`).
+     **Immediately call `request-input` for the next field** without
+     waiting for the user to say anything. The user already knows the
+     popup flow is in motion; pausing for confirmation between fields
+     wastes their time.
    - `1` — user dismissed. Stop, acknowledge, ask if they want to try
      again later.
    - `2` — timeout. Ask the user if they want to retry that field.

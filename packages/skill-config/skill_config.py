@@ -146,6 +146,25 @@ def list_skills(skills_dir: Path) -> list[str]:
     return sorted(p.name for p in skills_dir.iterdir() if (p / "SKILL.md").exists())
 
 
+def resolve_skill(skills_dir: Path, name: str) -> str:
+    """Map a user/agent-supplied skill name to its on-disk directory name.
+
+    Skills live at <skills_dir>/<dirname>/SKILL.md. Directory names are
+    lowercase but the SKILL.md `name:` field is a Title Case display
+    string, and small LLMs often pass that back as the lookup key.
+    Match case-insensitively so `schema Calendar` resolves to `calendar`.
+    """
+    candidates = list_skills(skills_dir)
+    for c in candidates:
+        if c == name:
+            return c
+    lowered = name.lower()
+    for c in candidates:
+        if c.lower() == lowered:
+            return c
+    return name  # fall through; caller will raise its usual not-found error
+
+
 def list_profiles(doc: tomlkit.TOMLDocument, skill: str) -> list[str]:
     skill_t = doc.get(skill)
     if not skill_t:
@@ -154,12 +173,13 @@ def list_profiles(doc: tomlkit.TOMLDocument, skill: str) -> list[str]:
 
 
 def cmd_init(args, paths: Paths) -> None:
-    skill_dir = paths.skills_dir / args.skill
+    skill = resolve_skill(paths.skills_dir, args.skill)
+    skill_dir = paths.skills_dir / skill
     if not skill_dir.exists():
         sys.exit(f"error: skill '{args.skill}' not found at {skill_dir}")
     cfg_fields, sec_fields = schema(skill_dir)
     if not cfg_fields and not sec_fields:
-        sys.exit(f"error: skill '{args.skill}' has no config:/secrets: in its SKILL.md")
+        sys.exit(f"error: skill '{skill}' has no config:/secrets: in its SKILL.md")
 
     profile = args.profile
     if profile is None:
@@ -167,8 +187,8 @@ def cmd_init(args, paths: Paths) -> None:
 
     config_doc = load_toml(paths.config_toml)
     secrets_doc = load_toml(paths.secrets_toml)
-    existing_cfg = section_get(config_doc, args.skill, profile)
-    existing_sec = section_get(secrets_doc, args.skill, profile)
+    existing_cfg = section_get(config_doc, skill, profile)
+    existing_sec = section_get(secrets_doc, skill, profile)
 
     print()
     new_cfg = {}
@@ -194,13 +214,13 @@ def cmd_init(args, paths: Paths) -> None:
         print()
 
     if new_cfg:
-        section_set(config_doc, args.skill, profile, new_cfg)
+        section_set(config_doc, skill, profile, new_cfg)
         save_toml(paths.config_toml, config_doc, CONFIG_MODE)
     if new_sec:
-        section_set(secrets_doc, args.skill, profile, new_sec)
+        section_set(secrets_doc, skill, profile, new_sec)
         save_toml(paths.secrets_toml, secrets_doc, SECRETS_MODE)
 
-    print(f"✓ Saved profile '{profile}' for skill '{args.skill}'.")
+    print(f"✓ Saved profile '{profile}' for skill '{skill}'.")
 
 
 def cmd_get(args, paths: Paths) -> None:
@@ -208,6 +228,7 @@ def cmd_get(args, paths: Paths) -> None:
     if len(parts) != 3:
         sys.exit("error: key must be <skill>.<profile>.<field>")
     skill, profile, field = parts
+    skill = resolve_skill(paths.skills_dir, skill)
 
     skill_dir = paths.skills_dir / skill
     if not skill_dir.exists():
@@ -238,7 +259,7 @@ def cmd_list(args, paths: Paths) -> None:
 
     if args.target:
         parts = args.target.split(".")
-        skill = parts[0]
+        skill = resolve_skill(paths.skills_dir, parts[0])
         skill_dir = paths.skills_dir / skill
         if not skill_dir.exists():
             sys.exit(f"error: skill '{skill}' not found")
@@ -295,6 +316,7 @@ def cmd_set(args, paths: Paths) -> None:
     if len(parts) != 3:
         sys.exit("error: key must be <skill>.<profile>.<field>")
     skill, profile, field = parts
+    skill = resolve_skill(paths.skills_dir, skill)
 
     skill_dir = paths.skills_dir / skill
     if not skill_dir.exists():
@@ -316,7 +338,8 @@ def cmd_set(args, paths: Paths) -> None:
 
 
 def cmd_schema(args, paths: Paths) -> None:
-    skill_dir = paths.skills_dir / args.skill
+    skill = resolve_skill(paths.skills_dir, args.skill)
+    skill_dir = paths.skills_dir / skill
     if not skill_dir.exists():
         sys.exit(f"error: skill '{args.skill}' not found at {skill_dir}")
     cfg_fields, sec_fields = schema(skill_dir)
@@ -354,6 +377,8 @@ def cmd_request_input(args, paths: Paths) -> None:
     if len(parts) != 3:
         sys.exit("error: key must be <skill>.<profile>.<field>")
     skill, profile, field = parts
+    skill = resolve_skill(paths.skills_dir, skill)
+    args.key = f"{skill}.{profile}.{field}"
 
     skill_dir = paths.skills_dir / skill
     if not skill_dir.exists():
@@ -412,6 +437,10 @@ def cmd_request_input(args, paths: Paths) -> None:
         section[field] = value
         section_set(doc, skill, profile, section)
         save_toml(path, doc, mode)
+        # Print a confirmation so the agent has a visible signal that
+        # the user submitted (small LLMs treat empty stdout as "nothing
+        # happened" even when the exit code is 0).
+        print(f"saved {args.key}")
         return
     if op == "cancelled":
         sys.stderr.write("cancelled by user\n")
@@ -423,21 +452,22 @@ def cmd_request_input(args, paths: Paths) -> None:
 
 
 def cmd_remove(args, paths: Paths) -> None:
+    skill = resolve_skill(paths.skills_dir, args.skill)
     config_doc = load_toml(paths.config_toml)
     secrets_doc = load_toml(paths.secrets_toml)
 
     removed = False
-    if section_delete(config_doc, args.skill, args.profile):
+    if section_delete(config_doc, skill, args.profile):
         save_toml(paths.config_toml, config_doc, CONFIG_MODE)
         removed = True
-    if section_delete(secrets_doc, args.skill, args.profile):
+    if section_delete(secrets_doc, skill, args.profile):
         save_toml(paths.secrets_toml, secrets_doc, SECRETS_MODE)
         removed = True
 
     if removed:
-        print(f"✓ Removed profile '{args.profile}' for skill '{args.skill}'.")
+        print(f"✓ Removed profile '{args.profile}' for skill '{skill}'.")
     else:
-        print(f"(nothing to remove for {args.skill}.{args.profile})")
+        print(f"(nothing to remove for {skill}.{args.profile})")
 
 
 def main() -> None:

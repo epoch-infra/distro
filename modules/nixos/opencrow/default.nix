@@ -300,7 +300,12 @@ in
         description = "skill-config IPC daemon for opencrow (${cfg.instanceName})";
         wantedBy = [ "multi-user.target" ];
         after = [ "local-fs.target" ];
-        environment.SKILL_CONFIG_SOCKET = "/run/opencrow-sock/skill-config.sock";
+        environment = {
+          SKILL_CONFIG_SOCKET = "/run/opencrow-sock/skill-config.sock";
+          # Stamps every event the daemon emits so the popup can label
+          # which opencrow asked for input.
+          OPENCROW_INSTANCE = cfg.instanceName;
+        };
         serviceConfig = {
           ExecStart = lib.getExe skillConfigDaemonPkg;
           Restart = "on-failure";
@@ -347,8 +352,14 @@ in
       description = "Symlink opencrow chat socket for noctalia plugin";
       after = [ "graphical-session.target" ];
       wantedBy = [ "graphical-session.target" ];
-      # Restart when the plugin store path changes (triggers QML cache clear).
-      restartTriggers = [ "${pluginDir}" ];
+      # Restart when either plugin's store path changes — that bumps the
+      # QML cache wipe so noctalia recompiles the updated files. Without
+      # this, nix store mtimes (all epoch+1) defeat Qt's path+mtime cache
+      # invalidation and the old compiled QML keeps loading.
+      restartTriggers = [
+        "${pluginDir}"
+        "${skillConfigPluginDir}"
+      ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;

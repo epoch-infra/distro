@@ -74,6 +74,9 @@ Item {
     // ── Description ───────────────────────────────────────────────────
     NText {
       Layout.fillWidth: true
+      // Markdown so SKILL.md can use bold, lists, and blank-line
+      // paragraph breaks for readable per-field guidance.
+      markdownTextEnabled: true
       text: req?.description ?? ""
       wrapMode: Text.Wrap
       color: Color.mOnSurfaceVariant

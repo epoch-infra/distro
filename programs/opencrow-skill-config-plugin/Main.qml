@@ -151,7 +151,11 @@ Item {
     id: oneShotComponent
     Socket {
       property var payload: null
-      connected: true
+      // Gate the dial on `path` being set. `connected: true` as an
+      // unconditional literal triggers a connect at the default empty
+      // path before createObject's initial properties are applied —
+      // QLocalSocket then wedges (see chat plugin's Loader comment).
+      connected: path !== ""
       onConnectionStateChanged: {
         if (!connected) return;
         write(JSON.stringify(payload) + "\n");
