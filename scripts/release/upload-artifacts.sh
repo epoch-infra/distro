@@ -38,10 +38,11 @@ sha_key="${iso_key}.sha256"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 sha_file="${tmp}/${sha_key}"
-( cd "$(dirname "$iso")" && sha256sum "$(basename "$iso")" ) \
-  | awk -v name="$iso_key" '{print $1 "  " name}' \
-  >"$sha_file"
+(cd "$(dirname "$iso")" && sha256sum "$(basename "$iso")") |
+  awk -v name="$iso_key" '{print $1 "  " name}' \
+    >"$sha_file"
 
+# shellcheck disable=SC2016 # $1..$7 are positional params for the inner sh -c
 nix shell nixpkgs#awscli2 --command sh -euc '
   aws --endpoint-url "$1" --region "$2" s3 cp "$3" "s3://$4/$5" --no-progress
   aws --endpoint-url "$1" --region "$2" s3 cp "$6" "s3://$4/$7" --no-progress

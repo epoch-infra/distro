@@ -14,11 +14,7 @@
     inputs.self.nixosModules.voxtype
     inputs.self.nixosModules.niri
     inputs.self.nixosModules.vm-debug
-  ];
-
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
+    inputs.self.nixosModules.nix
   ];
 
   services.greetd = {
