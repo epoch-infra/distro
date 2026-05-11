@@ -35,8 +35,8 @@ Item {
 
   // SmartPanel.qml sizes by contentPreferred{Width,Height} — without
   // these it falls back to its 900px default, ignoring implicitHeight.
-  property real contentPreferredWidth: 720
-  property real contentPreferredHeight: 600
+  property real contentPreferredWidth: 1440
+  property real contentPreferredHeight: 1200
   implicitWidth: contentPreferredWidth
   implicitHeight: contentPreferredHeight
 
@@ -92,7 +92,7 @@ Item {
       NComboBox {
         id: modelCombo
         Layout.alignment: Qt.AlignVCenter
-        minimumWidth: 180
+        minimumWidth: 320
         baseSize: 0.85
         tooltip: root.tr("panel.models-tooltip")
         // NComboBox expects [{key, name}]. We use "<provider>/<id>" as the
