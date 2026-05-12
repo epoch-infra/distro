@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
@@ -474,19 +475,27 @@ Item {
     }
   }
 
-  onVisibleChanged: if (visible) {
-    // Refresh the model list on every open so the dropdown reflects the
-    // current backend state (pi could have started/restarted with a
-    // different set of models since the last show).
-    chat?.listModels();
+  // Focus the compose box when the panel surface gains keyboard focus.
+  // On niri the layer-shell `active` flag flips true the instant the
+  // compositor routes keyboard input to us; that's the moment Qt can
+  // actually take focus. Doing it earlier races with the click that
+  // opened the panel.
+  Connections {
+    target: root.Window.window
+    ignoreUnknownSignals: true
+    function onActiveChanged() {
+      if (root.Window.window?.active) inputArea.forceActiveFocus();
+    }
+  }
 
-    // Double callLater: the first defers past the visibility
-    // change, the second waits for ListView to finish its layout
-    // pass so contentY=0 actually sticks.
-    Qt.callLater(() => Qt.callLater(() => {
-      if (history) { history.contentY = 0; history.returnToBounds(); }
-      input.forceActiveFocus();
-    }));
+  // Refresh the model list on every open so the dropdown reflects the
+  // current backend state, and snap the history to the newest bubble.
+  // The plugin Item is reinstantiated per open (SmartPanel's content
+  // Loader has `active: isPanelOpen`), so Component.onCompleted is the
+  // open hook.
+  Component.onCompleted: {
+    chat?.listModels();
+    if (history) { history.contentY = 0; history.returnToBounds(); }
   }
 
   // Ctrl+F from anywhere in the panel. Shortcut rather than Keys so it
