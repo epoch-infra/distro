@@ -26,7 +26,6 @@ which TOML file holds the value. Field name = TOML key.
 from __future__ import annotations
 
 import argparse
-import getpass
 import json
 import os
 import socket
@@ -170,57 +169,6 @@ def list_profiles(doc: tomlkit.TOMLDocument, skill: str) -> list[str]:
     if not skill_t:
         return []
     return sorted(skill_t.keys())
-
-
-def cmd_init(args, paths: Paths) -> None:
-    skill = resolve_skill(paths.skills_dir, args.skill)
-    skill_dir = paths.skills_dir / skill
-    if not skill_dir.exists():
-        sys.exit(f"error: skill '{args.skill}' not found at {skill_dir}")
-    cfg_fields, sec_fields = schema(skill_dir)
-    if not cfg_fields and not sec_fields:
-        sys.exit(f"error: skill '{skill}' has no config:/secrets: in its SKILL.md")
-
-    profile = args.profile
-    if profile is None:
-        profile = input("Profile name [default] > ").strip() or "default"
-
-    config_doc = load_toml(paths.config_toml)
-    secrets_doc = load_toml(paths.secrets_toml)
-    existing_cfg = section_get(config_doc, skill, profile)
-    existing_sec = section_get(secrets_doc, skill, profile)
-
-    print()
-    new_cfg = {}
-    for name, desc in cfg_fields.items():
-        current = existing_cfg.get(name)
-        suffix = f"\n  [{current}] > " if current is not None else "\n  > "
-        val = input(f"{desc}{suffix}").strip()
-        if not val and current is not None:
-            val = current
-        if val:
-            new_cfg[name] = val
-        print()
-
-    new_sec = {}
-    for name, desc in sec_fields.items():
-        has_existing = existing_sec.get(name) is not None
-        suffix = "\n  [hidden — enter to keep] > " if has_existing else "\n  > "
-        val = getpass.getpass(f"{desc}{suffix}")
-        if not val and has_existing:
-            val = existing_sec[name]
-        if val:
-            new_sec[name] = val
-        print()
-
-    if new_cfg:
-        section_set(config_doc, skill, profile, new_cfg)
-        save_toml(paths.config_toml, config_doc, CONFIG_MODE)
-    if new_sec:
-        section_set(secrets_doc, skill, profile, new_sec)
-        save_toml(paths.secrets_toml, secrets_doc, SECRETS_MODE)
-
-    print(f"✓ Saved profile '{profile}' for skill '{skill}'.")
 
 
 def cmd_get(args, paths: Paths) -> None:
@@ -478,10 +426,6 @@ def main() -> None:
     )
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    p_init = sub.add_parser("init", help="set up a profile interactively")
-    p_init.add_argument("skill")
-    p_init.add_argument("profile", nargs="?")
-
     p_get = sub.add_parser("get", help="read one value (used by skills)")
     p_get.add_argument("key", help="<skill>.<profile>.<field>")
 
@@ -521,7 +465,6 @@ def main() -> None:
     paths = Paths(instance)
 
     {
-        "init": cmd_init,
         "get": cmd_get,
         "set": cmd_set,
         "request-input": cmd_request_input,
