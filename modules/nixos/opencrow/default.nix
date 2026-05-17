@@ -333,6 +333,9 @@ in
     # inside the container is the primary path; this is a fallback.
     environment.systemPackages = [ skillConfigPkg ];
 
+    # The container unit below is only generated when this is enabled.
+    boot.enableContainers = lib.mkDefault true;
+
     # Sidecar daemon inside the opencrow container. The upstream
     # services.opencrow.instances.<name> module sets containers.<container>.config
     # inline; NixOS module merging lets us add another systemd service to the
